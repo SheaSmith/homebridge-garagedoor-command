@@ -11,40 +11,10 @@
         "default": "Garage Door",
         "required": true
       },
-      "open": {
-        "title": "Command to open door",
+      "url": {
+        "title": "URL",
         "type": "string",
         "required": true
-      },
-      "close": {
-        "title": "Command to close door",
-        "type": "string",
-        "required": true
-      },
-      "state": {
-        "title": "Command to get state/satus of the door",
-        "type": "string",
-        "required": true
-      },
-      "status_update_delay": {
-        "title": "Status Update Delay",
-        "type": "string",
-        "default": "15",
-        "placeholder": "# of seconds to close",
-        "required": true
-      },
-      "poll_state_delay": {
-        "title": "Enable Polling (in seconds)",
-        "type": "integer",
-        "placeholder": "# of seconds"
-      },
-      "ignore_errors": {
-        "title": "Ignore Errors",
-        "type": "boolean"
-      },
-      "log_polling": {
-        "title": "Log Polling",
-        "type": "boolean"
       }
     }
   },

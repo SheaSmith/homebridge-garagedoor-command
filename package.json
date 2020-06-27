@@ -19,5 +19,7 @@
     "type": "git",
     "url": "git://github.com/apexad/homebridge-garagedoor-command.git"
   },
-  "dependencies": {}
+  "dependencies": {
+    "request": "^2.88.2"
+  }
 }

@@ -1,6 +1,6 @@
 var Service;
 var Characteristic;
-var exec = require('child_process').exec;
+var request = require('request');
 
 module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
@@ -11,13 +11,9 @@ module.exports = function(homebridge) {
 function GarageCmdAccessory(log, config) {
   this.log = log;
   this.name = config.name;
-  this.openCommand = config.open;
-  this.closeCommand = config.close;
-  this.stateCommand = config.state;
-  this.statusUpdateDelay = config.status_update_delay || 15;
-  this.pollStateDelay = config.poll_state_delay || 0;
-  this.ignoreErrors = config.ignore_errors || false;
-  this.logPolling = config.log_polling || false;
+  this.url = config.url;
+  this.statusUpdateDelay = 15;
+  this.pollStateDelay = 0;
 }
 
 GarageCmdAccessory.prototype.setState = function(isClosed, callback, context) {
@@ -29,27 +25,10 @@ GarageCmdAccessory.prototype.setState = function(isClosed, callback, context) {
 
   var accessory = this;
   var state = isClosed ? 'close' : 'open';
-  var prop = state + 'Command';
-  var command = accessory[prop];
-  accessory.log('Commnand to run: ' + command);
 
-  exec(
-    command,
-    {
-      encoding: 'utf8',
-      timeout: 10000,
-      maxBuffer: 200*1024,
-      killSignal: 'SIGTERM',
-      cwd: null,
-      env: null
-    },
-    function (err, stdout, stderr) {
-      if (err) {
-        accessory.log('Error: ' + err);
-        callback(err || new Error('Error setting ' + accessory.name + ' to ' + state));
-      } else {
+  request.post(`${this.url}/toggle`, function (error, response, body) {
         accessory.log('Set ' + accessory.name + ' to ' + state);
-        if (stdout.indexOf('OPENING') > -1) {
+        if (state == 'open') {
           accessory.garageDoorService.setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.OPENING);
           setTimeout(
             function() {
@@ -57,7 +36,7 @@ GarageCmdAccessory.prototype.setState = function(isClosed, callback, context) {
             },
             accessory.statusUpdateDelay * 1000
           );
-        } else if (stdout.indexOf('CLOSING') > -1) {
+        } else {
           accessory.garageDoorService.setCharacteristic(Characteristic.CurrentDoorState, Characteristic.CurrentDoorState.CLOSING);
           setTimeout(
             function() {
@@ -67,7 +46,6 @@ GarageCmdAccessory.prototype.setState = function(isClosed, callback, context) {
           );
         }
        callback(null);
-     }
   });
 };
 
@@ -75,21 +53,12 @@ GarageCmdAccessory.prototype.getState = function(callback) {
   var accessory = this;
   var command = accessory.stateCommand;
 
-  exec(command, function (err, stdout, stderr) {
-    if (err) {
-      accessory.log('Error: ' + err);
-      callback(err || new Error('Error getting state of ' + accessory.name));
-    } else {
-      var state = stdout.toString('utf-8').trim();
-      if (state === 'STOPPED' && accessory.ignoreErrors) {
-        state = 'CLOSED';
-      }
-      if (accessory.logPolling) {
-        accessory.log('State of ' + accessory.name + ' is: ' + state);
-      }
+  request.post(`${this.url}/status`, function (error, response, body) {
+      var state = body == 'open' ? 'OPEN' : 'CLOSED';
+      accessory.log('State of ' + accessory.name + ' is: ' + state);
 
       callback(null, Characteristic.CurrentDoorState[state]);
-    }
+    
 
     if (accessory.pollStateDelay > 0) {
       accessory.pollState();
