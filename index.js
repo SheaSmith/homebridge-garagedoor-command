@@ -51,7 +51,7 @@ GarageCmdAccessory.prototype.setState = function(isClosed, callback, context) {
 
 GarageCmdAccessory.prototype.getState = function(callback) {
   var accessory = this;
-  var command = accessory.stateCommand;
+  accessory.log('Test');
 
   request.post(`${this.url}/status`, function (error, response, body) {
       var state = body == 'open' ? 'OPEN' : 'CLOSED';
