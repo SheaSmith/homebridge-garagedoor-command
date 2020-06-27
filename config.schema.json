@@ -20,29 +20,7 @@
   },
   "form": [
     "name",
-    "open",
-    "close",
-    "state",
-    "status_update_delay",
-    {
-      "type": "fieldset",
-      "expandable": true,
-      "title": "Polling Settings",
-      "description": "Options for polling Garage Door when Home app is closed",
-      "items": [
-        "poll_state_delay",
-        "log_polling"
-      ]
-    },
-    {
-      "type": "fieldset",
-      "expandable": true,
-      "title": "Advanced Settings",
-      "description": "Don't change these, unless you understand what you're doing.",
-      "items": [
-        "ignore_errors"
-      ]
-    }
+    "url"
   ],
   "display": null
 }
